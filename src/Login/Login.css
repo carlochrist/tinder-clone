@@ -1,0 +1,46 @@
+.login {
+    /* display: flex;
+    flex-direction: column;
+    justify-content: space-between; */
+    background-image: url("./../Assets/Img/login-background.jpg");
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    object-fit: contain;
+    /* margin-bottom: 15px;  */
+}
+
+.login__logo {
+    display: flex;
+    /* flex-wrap: wrap-reverse; */
+    /* flex-direction: row; */
+}
+
+.login__container {
+    /* justify-content: center; */
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    margin-left: 10px;
+    /* align-items: center; */
+    /* justify-content: space-between; */
+
+    /* border: 1px solid black; */
+}
+
+.login__container > button {
+    /* margin-left: auto; */
+    background-color: lightgrey;
+    padding: 10px;
+    border-radius: 20px;
+    /* color: white; */
+}
+
+h1 {
+    -webkit-text-stroke: 1px black; /* width and color */
+    /* font-family: sans; */
+    /* color: black; */
+}

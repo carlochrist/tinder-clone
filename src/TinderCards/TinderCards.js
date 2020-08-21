@@ -4,48 +4,48 @@ import database from "./../firebase";
 import "./TinderCards.css";
 
 function TinderCards() {
-  const [people, setPeople] = useState([]);
+  const [users, setUser] = useState([]);
 
-  // piece of code which runs based on a condition
-  useEffect(() => {
-    // this is where the code runs...
+  // // piece of code which runs based on a condition
+  // useEffect(() => {
+  //   // this is where the code runs...
 
-    const unsubscribe = database
-      .collection("people")
-      .onSnapshot((snapshot) =>
-        setPeople(snapshot.docs.map((doc) => doc.data()))
-      );
+  //   const unsubscribe = database
+  //     .collection("users")
+  //     .onSnapshot((snapshot) =>
+  //       setUser(snapshot.docs.map((doc) => doc.data()))
+  //     );
 
-    return () => {
-      // this is the cleanup...
-      unsubscribe();
-    };
+  //   return () => {
+  //     // this is the cleanup...
+  //     unsubscribe();
+  //   };
 
-    // this will run ONCE when the component loads and never again
-  }, [people]);
+  //   // this will run ONCE when the component loads and never again
+  // }, []);
 
   // pushing
   // BAD
-  // const people = [];
-  // people.push('abc', 'def');
+  // const user = [];
+  // user.push('abc', 'def');
 
   // GOOD (push to an array in REACT)
-  // setPeople([...people, 'abc', 'def'])
+  // setUser([...user, 'abc', 'def'])
 
   return (
     <div>
       <div className="tinderCards__cardContainer">
-        {people.map((person) => (
+        {users.map((user) => (
           <TinderCard
             className="swipe"
-            key={person.name}
+            key={user.name}
             preventSwipe={["up", "down"]}
           >
             <div
-              style={{ backgroundImage: `url(${person.url})` }}
+              style={{ backgroundImage: `url(${user.url})` }}
               className="card"
             >
-              <h3 style={{ color: "black" }}>{person.name}</h3>
+              <h3 style={{ color: "black" }}>{user.name}</h3>
             </div>
           </TinderCard>
         ))}
