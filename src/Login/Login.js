@@ -4,7 +4,7 @@ import "./Login.css";
 import { database, auth } from "./../firebase";
 
 function Login(props) {
-  console.log(props);
+  //   console.log(props);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -13,9 +13,9 @@ function Login(props) {
   const [signInPressed, setSignInPressed] = useState(false);
   const [signUpPressed, setSignUpPressed] = useState(false);
 
-  const sendData = (authUser) => {
-    console.log(authUser);
-    console.log(props);
+  const setUserInMainComponent = (authUser) => {
+    // console.log(authUser);
+    // console.log(props);
     props.onChange(authUser);
   };
 
@@ -24,13 +24,12 @@ function Login(props) {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         // user has logged in
-        console.log(authUser);
+        // console.log(authUser);
         setUser(authUser);
-        // handleChange(user);
 
-        console.log(props);
-        console.log(props.handleChange);
-        sendData(authUser);
+        // console.log(props);
+        // console.log(props.handleChange);
+        setUserInMainComponent(authUser);
         // props.handleChange(props.item.id)}
       } else {
         // user logged out
@@ -58,6 +57,14 @@ function Login(props) {
     auth
       .createUserWithEmailAndPassword(email, password)
       .then((authUser) => {
+        database.collection("users").add({
+          username: username,
+          email: email,
+          pictures: [],
+          liked: [],
+          disliked: [],
+          matches: [],
+        });
         return authUser.user.updateProfile({
           displayName: username,
         });

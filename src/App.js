@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import "./App.css";
 import Header from "./Header/Header";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import TinderCard from "react-tinder-card";
-import TinderCards from "./TinderCards/TinderCards";
+import MatchGame from "./MatchGame/MatchGame";
 import SwipeButtons from "./Swipe/SwipeButtons";
 import Chats from "./Chats/Chats";
 import ChatScreen from "./Chats/ChatScreen/ChatScreen";
@@ -14,7 +13,7 @@ function App() {
   const [user, setUser] = useState(null);
 
   const handleChange = (newUser) => {
-    console.log(newUser);
+    // console.log(newUser);
     setUser(newUser);
   };
 
@@ -30,7 +29,7 @@ function App() {
           <Switch>
             <Route path="/profile">
               <Header />
-              <Profile email={user.email} />
+              <Profile user={user} onChange={handleChange} />
             </Route>
             <Route path="/chat/:person">
               <Header backButton="/chat" />
@@ -42,7 +41,7 @@ function App() {
             </Route>
             <Route path="/">
               <Header />
-              <TinderCards />
+              <MatchGame />
               <SwipeButtons />
             </Route>
           </Switch>

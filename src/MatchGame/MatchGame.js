@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from "react";
 import TinderCard from "react-tinder-card";
-import database from "./../firebase";
-import "./TinderCards.css";
+import { database } from "./../firebase";
+import "./MatchGame.css";
 
-function TinderCards() {
+function MatchGame() {
   const [users, setUser] = useState([]);
 
-  // // piece of code which runs based on a condition
-  // useEffect(() => {
-  //   // this is where the code runs...
+  // piece of code which runs based on a condition
+  useEffect(() => {
+    // this is where the code runs...
 
-  //   const unsubscribe = database
-  //     .collection("users")
-  //     .onSnapshot((snapshot) =>
-  //       setUser(snapshot.docs.map((doc) => doc.data()))
-  //     );
+    const unsubscribe = database
+      .collection("users")
+      .onSnapshot((snapshot) =>
+        setUser(snapshot.docs.map((doc) => doc.data()))
+      );
 
-  //   return () => {
-  //     // this is the cleanup...
-  //     unsubscribe();
-  //   };
+    return () => {
+      // this is the cleanup...
+      unsubscribe();
+    };
 
-  //   // this will run ONCE when the component loads and never again
-  // }, []);
+    // this will run ONCE when the component loads and never again
+  }, []);
 
   // pushing
   // BAD
@@ -34,7 +34,7 @@ function TinderCards() {
 
   return (
     <div>
-      <div className="tinderCards__cardContainer">
+      <div className="matchGame__cardContainer">
         {users.map((user) => (
           <TinderCard
             className="swipe"
@@ -54,4 +54,4 @@ function TinderCards() {
   );
 }
 
-export default TinderCards;
+export default MatchGame;

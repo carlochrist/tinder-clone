@@ -16,7 +16,7 @@
   color: white;
 }
 
-.tinderCards__cardContainer {
+.matchGame__cardContainer {
   display: flex;
   justify-content: center;
   margin-top: 5vh;
