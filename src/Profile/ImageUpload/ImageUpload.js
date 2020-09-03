@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Button } from "@material-ui/core";
-import { storage, database } from "./../../firebase";
+import { firebaseApp, storage, database } from "./../../firebase";
+import firebase from "firebase";
 import "./ImageUpload.css";
 
 // destructuring -->  ImageUpload(props) --> ImageUpload({username})
-export default function ImageUpload({ username }) {
+export default function ImageUpload(user) {
   const [image, setImage] = useState(null);
   const [progress, setProgress] = useState(0);
   const [caption, setCaption] = useState("");
@@ -15,42 +16,54 @@ export default function ImageUpload({ username }) {
     }
   };
 
+  const logData = () => {
+    console.log("user: ", user);
+  };
+
   const handleUpload = () => {
-    // const uploadTask = storage.ref(`images/${image.name}`).put(image);
-    // uploadTask.on(
-    //   "state_changed",
-    //   (snapshot) => {
-    //     // progress function
-    //     const progress = Math.round(
-    //       (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-    //     );
-    //     setProgress(progress);
-    //   },
-    //   (error) => {
-    //     // Error function
-    //     console.log(error);
-    //     alert(error.message);
-    //   },
-    //   () => {
-    //     // complete function
-    //     storage
-    //       .ref("images")
-    //       .child(image.name)
-    //       .getDownloadURL()
-    //       .then((url) => {
-    //         // post image inside db
-    //         database.collection("users").doc({user.email}).add({
-    //           timestamp: database.firestore.FieldValue.serverTimestamp(),
-    //           caption: caption,
-    //           imageUrl: url,
-    //           username: username,
-    //         });
-    //         setProgress(0);
-    //         setCaption("");
-    //         setImage(null);
-    //       });
-    //   }
-    // );
+    console.log(user);
+    console.log(user.user.id);
+
+    // const FieldValue = database.firestore.FieldValue;
+    const uploadTask = storage.ref(`images/${image.name}`).put(image);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // progress function
+        const progress = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setProgress(progress);
+      },
+      (error) => {
+        // Error function
+        console.log(error);
+        alert(error.message);
+      },
+      () => {
+        // complete function
+        storage
+          .ref("images")
+          .child(image.name)
+          .getDownloadURL()
+          .then((url) => {
+            // post image inside db
+            database
+              .collection("users")
+              .doc(user.user.id)
+              .collection("pictures")
+              .add({
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                caption: caption,
+                imageUrl: url,
+                username: user.user.username,
+              });
+            setProgress(0);
+            setCaption("");
+            setImage(null);
+          });
+      }
+    );
   };
 
   return (
@@ -64,6 +77,7 @@ export default function ImageUpload({ username }) {
       />
       <input type="file" onChange={handleChange} />
       <Button onClick={handleUpload}>Upload</Button>
+      <Button onClick={logData}>log</Button>
     </div>
   );
 }

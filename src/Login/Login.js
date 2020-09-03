@@ -24,7 +24,7 @@ function Login(props) {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         // user has logged in
-        // console.log(authUser);
+        console.log(authUser);
         setUser(authUser);
 
         // console.log(props);
@@ -60,10 +60,6 @@ function Login(props) {
         database.collection("users").add({
           username: username,
           email: email,
-          pictures: [],
-          liked: [],
-          disliked: [],
-          matches: [],
         });
         return authUser.user.updateProfile({
           displayName: username,
