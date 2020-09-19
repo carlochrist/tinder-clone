@@ -1,9 +1,10 @@
 .card {
   position: relative;
+  /* position: absolute; */
   width: 600px;
   padding: 20px;
   max-width: 85vw;
-  height: 50vw;
+  height: 45vw;
   border-radius: 20px;
   background-size: cover;
   background-position: center;
@@ -16,12 +17,44 @@
   color: white;
 }
 
-.matchGame__cardContainer {
+.imagelol {
+  object-fit: contain;
+  display: flex;
+  justify-content: center;
+}
+
+.matchGame__outerCardContainer {
+  /* object-fit: contain; */
+  display: flex;
+  justify-content: center;
+  margin-top: 5vh;
+
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
+
+  /* display: flex;
+  justify-content: center;
+  border-bottom: 1px solid #f9f9f9;
+  align-items: center; */
+}
+
+.matchGame__innerCardContainer {
+  /* object-fit: contain; */
   display: flex;
   justify-content: center;
   margin-top: 5vh;
 }
 
 .swipe {
+  /* position: absolute; */
+}
+
+.container {
+  position: relative;
+}
+
+imagee {
   position: absolute;
+  z-index: 1;
 }

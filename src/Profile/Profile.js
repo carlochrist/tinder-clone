@@ -33,9 +33,15 @@ function Profile(props) {
         const currentUser = doc.data();
         if (props.user.email === currentUser["email"]) {
           currentUser.id = doc.id;
-
-          // setPictures([]);
-          // console.log(pictures);
+          if (!currentUser.hasOwnProperty("gender")) {
+            currentUser.gender = "male";
+          }
+          if (!currentUser.hasOwnProperty("lookingFor")) {
+            currentUser.lookingFor = "";
+          }
+          if (!currentUser.hasOwnProperty("hereFor")) {
+            currentUser.hereFor = [];
+          }
 
           database
             .collection("users")
@@ -45,6 +51,7 @@ function Profile(props) {
               setPictures(snapshot.docs.map((doc) => doc.data()));
             });
 
+          console.log(currentUser);
           setUser(currentUser);
         }
       });
@@ -60,14 +67,34 @@ function Profile(props) {
     props.onChange(null);
   };
 
-  const onUpdate = () => {
-    // database
-    //   .collection("users")
-    //   .doc("0yTqcVR4JbkbpoBSzYV7")
-    //   .set({
-    //     ...user,
-    //     user,
-    //   });
+  const updateUserData = (event) => {
+    // object-destructuring
+    const { name, value, type, checked } = event.target;
+
+    // console.log(event);
+    // console.log(name);
+    // console.log(value);
+    // console.log(type);
+    // console.log(checked);
+
+    if (type === "checkbox") {
+      if (user.hereFor.indexOf(name) !== -1) {
+        user.hereFor.splice(user.hereFor.indexOf(name), 1);
+      } else {
+        user.hereFor.push(name);
+      }
+    } else {
+      user[name] = value;
+    }
+
+    database.collection("users").doc(user.id).set(
+      {
+        gender: user.gender,
+        lookingFor: user.lookingFor,
+        hereFor: user.hereFor,
+      },
+      { merge: true }
+    );
     console.log(user);
   };
 
@@ -75,6 +102,10 @@ function Profile(props) {
     console.log("props: ", props);
     console.log("user: ", user);
     console.log("pictures: ", pictures);
+  };
+
+  const checkIfChecked = (hereFor) => {
+    return user.hereFor.indexOf(hereFor) !== -1 ? true : false;
   };
 
   return (
@@ -94,20 +125,117 @@ function Profile(props) {
         ) : null}
       </div>
 
-      {user ? <p>Welcome {user.username}!</p> : null}
-
-      <input
-        value={user ? { user } : null}
-        onChange={(e) => {
-          setUser(e.target.value);
-        }}
-      />
-      <button onClick={onUpdate}>Update</button>
-      <button onClick={logData}>log data</button>
-
-      {props.user.email}
       <ImageUpload user={user} />
-      <button onClick={deleteUser}>Logout</button>
+
+      <div>
+        {user ? <label>Hey {user.username}!</label> : null}
+
+        <form>
+          {user ? (
+            <div>
+              <br />
+              <br />
+              <label>Gender: </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="male"
+                  checked={user.gender === "male"}
+                  onChange={updateUserData}
+                />
+                male
+              </label>
+
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="female"
+                  checked={user.gender === "female"}
+                  onChange={updateUserData}
+                />
+                female
+              </label>
+
+              <br />
+              <br />
+
+              <label>Looking for: </label>
+              <label>
+                <input
+                  type="radio"
+                  name="lookingFor"
+                  value="male"
+                  checked={user.lookingFor === "male"}
+                  onChange={updateUserData}
+                />
+                male
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="lookingFor"
+                  value="female"
+                  checked={user.lookingFor === "female"}
+                  onChange={updateUserData}
+                />
+                female
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="lookingFor"
+                  value="both"
+                  checked={user.lookingFor === "both"}
+                  onChange={updateUserData}
+                />
+                both
+              </label>
+
+              <br />
+              <br />
+
+              <label>Here for: </label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  name="chats"
+                  checked={checkIfChecked("chats")}
+                  onChange={updateUserData}
+                />
+                chats
+              </label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  name="acquaintances"
+                  checked={checkIfChecked("acquaintances")}
+                  onChange={updateUserData}
+                />
+                acquaintances
+              </label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  name="dates"
+                  checked={checkIfChecked("dates")}
+                  onChange={updateUserData}
+                />
+                dates
+              </label>
+
+              <br />
+              <br />
+            </div>
+          ) : null}
+        </form>
+
+        <button onClick={deleteUser}>Logout</button>
+      </div>
     </div>
   );
 }
@@ -141,3 +269,12 @@ export default Profile;
 //   </Slider>
 // ) : null}
 // </div>
+
+// <input
+// value={user ? { user } : null}
+// onChange={(e) => {
+//   setUser(e.target.value);
+// }}
+// />
+// <button onClick={updateUserData}>Update</button>
+// <button onClick={logData}>log data</button>

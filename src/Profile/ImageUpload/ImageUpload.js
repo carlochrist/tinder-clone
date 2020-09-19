@@ -54,9 +54,9 @@ export default function ImageUpload(user) {
               .collection("pictures")
               .add({
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                caption: caption,
                 imageUrl: url,
-                username: user.user.username,
+                // caption: caption,
+                // username: user.user.username,
               });
             setProgress(0);
             setCaption("");
@@ -68,16 +68,19 @@ export default function ImageUpload(user) {
 
   return (
     <div className="imageupload">
-      <progress className="imageupload__progress" value={progress} max="100" />
-      <input
-        type="text"
-        placeholder="Enter a caption..."
-        onChange={(event) => setCaption(event.target.value)}
-        value={caption}
-      />
+      <p>Add picture: </p>
       <input type="file" onChange={handleChange} />
       <Button onClick={handleUpload}>Upload</Button>
-      <Button onClick={logData}>log</Button>
+      <progress className="imageupload__progress" value={progress} max="100" />
     </div>
   );
 }
+
+// <input
+// type="text"
+// placeholder="Enter a caption..."
+// onChange={(event) => setCaption(event.target.value)}
+// value={caption}
+// />
+
+// <Button onClick={logData}>log</Button>
