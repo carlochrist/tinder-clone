@@ -49,12 +49,3 @@
 .swipe {
   /* position: absolute; */
 }
-
-.container {
-  position: relative;
-}
-
-imagee {
-  position: absolute;
-  z-index: 1;
-}

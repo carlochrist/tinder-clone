@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import Header from "./Header/Header";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
@@ -8,13 +8,40 @@ import Chats from "./Chats/Chats";
 import ChatScreen from "./Chats/ChatScreen/ChatScreen";
 import Profile from "./Profile/Profile";
 import Login from "./Login/Login";
+import { database } from "./firebase";
 
 function App() {
   const [user, setUser] = useState(null);
 
   const handleChange = (newUser) => {
-    // console.log(newUser);
-    setUser(newUser);
+    database.collection("users").onSnapshot((snapshot) => {
+      console.log(user);
+      snapshot.forEach((doc) => {
+        const currentUser = doc.data();
+        if (newUser.email === currentUser["email"]) {
+          currentUser.id = doc.id;
+          if (!currentUser.hasOwnProperty("gender")) {
+            currentUser.gender = "male";
+          }
+          if (!currentUser.hasOwnProperty("lookingFor")) {
+            currentUser.lookingFor = "";
+          }
+          if (!currentUser.hasOwnProperty("hereFor")) {
+            currentUser.hereFor = [];
+          }
+          if (!currentUser.hasOwnProperty("likes")) {
+            currentUser.likes = [];
+          }
+          if (!currentUser.hasOwnProperty("dislikes")) {
+            currentUser.dislikes = [];
+          }
+          if (!currentUser.hasOwnProperty("matches")) {
+            currentUser.matches = [];
+          }
+          setUser(currentUser);
+        }
+      });
+    });
   };
 
   // We pass a callback to Child
@@ -41,7 +68,7 @@ function App() {
             </Route>
             <Route path="/">
               <Header />
-              <MatchGame />
+              <MatchGame user={user} />
               <SwipeButtons />
             </Route>
           </Switch>

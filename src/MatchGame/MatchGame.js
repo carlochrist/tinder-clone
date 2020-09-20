@@ -6,7 +6,8 @@ import useDeepCompareEffect, {
   useDeepCompareEffectNoCheck,
 } from "use-deep-compare-effect";
 
-function MatchGame() {
+function MatchGame(loggedInUser) {
+  const [user, setUser] = useState();
   const [users, setUsers] = useState([]);
   const [pictures, setPictures] = useState([]);
   const [picture, setPicture] = useState(null);
@@ -42,6 +43,9 @@ function MatchGame() {
   // useDeepCompareEffectNoCheck(() => {
   useEffect(() => {
     // this is where the code runs...
+
+    let tempUser = null;
+
     const unsubscribe = database.collection("users").onSnapshot((snapshot) => {
       snapshot.forEach((doc) => {
         const currentUser = {
@@ -49,35 +53,56 @@ function MatchGame() {
           ...doc.data(),
         };
 
-        database
-          .collection("users")
-          .doc(currentUser.id)
-          .collection("pictures")
-          .get()
-          .then((response) => {
-            const fetchedPictures = [];
-            response.forEach((document) => {
-              const fetchedPicture = {
-                id: document.id,
-                ...document.data(),
-              };
-              fetchedPictures.push(fetchedPicture);
-            });
+        console.log(loggedInUser);
 
-            currentUser.pictures = [];
-            Object.assign(currentUser.pictures, fetchedPictures);
-          })
-          .catch((error) => {
-            // setError(error);
-            console.log(error);
-          });
+        // const currentUser = doc.data();
+        // if (props.user.email === currentUser["email"]) {
+        //   currentUser.id = doc.id;
+        //   if (!currentUser.hasOwnProperty("gender")) {
+        //     currentUser.gender = "male";
+        //   }
+        //   if (!currentUser.hasOwnProperty("lookingFor")) {
+        //     currentUser.lookingFor = "";
+        //   }
+        //   if (!currentUser.hasOwnProperty("hereFor")) {
+        //     currentUser.hereFor = [];
+        //   }
 
-        console.log(currentUser);
+        if (loggedInUser.user.email !== currentUser.email) {
+          console.log(loggedInUser.user);
+          console.log(currentUser);
+          if (loggedInUser.user.lookingFor === currentUser.gender) {
+            database
+              .collection("users")
+              .doc(currentUser.id)
+              .collection("pictures")
+              .get()
+              .then((response) => {
+                const fetchedPictures = [];
+                response.forEach((document) => {
+                  const fetchedPicture = {
+                    id: document.id,
+                    ...document.data(),
+                  };
+                  fetchedPictures.push(fetchedPicture);
+                });
 
-        setUsers((oldUsers) => [...oldUsers, currentUser]);
-        // setUsers(users);
+                currentUser.pictures = [];
+                Object.assign(currentUser.pictures, fetchedPictures);
+              })
+              .catch((error) => {
+                // setError(error);
+                console.log(error);
+              });
 
-        console.log(users);
+            console.log(currentUser);
+
+            setUsers((oldUsers) => [...oldUsers, currentUser]);
+            // setUsers(users);
+
+            console.log(users);
+          }
+        }
       });
     });
 
