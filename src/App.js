@@ -44,7 +44,7 @@ function App() {
     });
   };
 
-  // We pass a callback to Child
+  // passing a callback to a Child:
   // return <Child value={value} onChange={handleChange} />;
 
   return (

@@ -72,35 +72,40 @@ function MatchGame(loggedInUser) {
           console.log(loggedInUser.user);
           console.log(currentUser);
           if (loggedInUser.user.lookingFor === currentUser.gender) {
-            database
-              .collection("users")
-              .doc(currentUser.id)
-              .collection("pictures")
-              .get()
-              .then((response) => {
-                const fetchedPictures = [];
-                response.forEach((document) => {
-                  const fetchedPicture = {
-                    id: document.id,
-                    ...document.data(),
-                  };
-                  fetchedPictures.push(fetchedPicture);
+            if (
+              !loggedInUser.user.dislikes.includes(currentUser.email) &&
+              !loggedInUser.user.likes.includes(currentUser.email)
+            ) {
+              database
+                .collection("users")
+                .doc(currentUser.id)
+                .collection("pictures")
+                .get()
+                .then((response) => {
+                  const fetchedPictures = [];
+                  response.forEach((document) => {
+                    const fetchedPicture = {
+                      id: document.id,
+                      ...document.data(),
+                    };
+                    fetchedPictures.push(fetchedPicture);
+                  });
+
+                  currentUser.pictures = [];
+                  Object.assign(currentUser.pictures, fetchedPictures);
+                })
+                .catch((error) => {
+                  // setError(error);
+                  console.log(error);
                 });
 
-                currentUser.pictures = [];
-                Object.assign(currentUser.pictures, fetchedPictures);
-              })
-              .catch((error) => {
-                // setError(error);
-                console.log(error);
-              });
+              console.log(currentUser);
 
-            console.log(currentUser);
+              setUsers((oldUsers) => [...oldUsers, currentUser]);
+              // setUsers(users);
 
-            setUsers((oldUsers) => [...oldUsers, currentUser]);
-            // setUsers(users);
-
-            console.log(users);
+              console.log(users);
+            }
           }
         }
       });
@@ -123,32 +128,41 @@ function MatchGame(loggedInUser) {
   // setUser([...user, 'abc', 'def'])
 
   const onSwipe = (direction, user) => {
-    // console.log("You swiped: " + direction);
+    console.log("You swiped: " + direction);
     // console.log("User: ", user);
 
     console.log(user);
     console.log(users);
+    console.log(loggedInUser);
+
+    if (direction === "left") {
+      loggedInUser.user.dislikes.push(user.email);
+      database.collection("users").doc(loggedInUser.user.id).set(
+        {
+          dislikes: loggedInUser.user.dislikes,
+        },
+        { merge: true }
+      );
+    } else {
+      loggedInUser.user.likes.push(user.email);
+      database.collection("users").doc(loggedInUser.user.id).set(
+        {
+          likes: loggedInUser.user.likes,
+        },
+        { merge: true }
+      );
+    }
 
     // console.log(pictures);
     // console.log(picture);
 
-    for (let i = 0; i < users.length; i++) {
-      if (users[i].id === user.id) {
-        users.splice(i, 1);
-      }
-    }
-
-    setUsers(users);
-
-    pictures.splice(0, 1);
-
-    setPictures(pictures);
-
-    // setUsers(users.filter((user) => user.id === user.id));
-    // console.log(users);
-    // if (users.length > 0) {
-    //   loadUserPictures(users[users.length - 1].id);
+    // for (let i = 0; i < users.length; i++) {
+    //   if (users[i].id === user.id) {
+    //     users.splice(i, 1);
+    //   }
     // }
+
+    // setUsers(users);
   };
 
   const reRenderUsers = () => {
@@ -176,7 +190,7 @@ function MatchGame(loggedInUser) {
         <button onClick={reRenderUsers}> reRedner users </button>
       ) : null}
 
-      {users.map((user, index) => (
+      {users.reverse().map((user, index) => (
         <div key={user.id} className="matchGame__innerCardContainer">
           {user.pictures && (
             <TinderCard

@@ -116,7 +116,7 @@ function Profile(props) {
             {pictures.map((picture) => {
               // console.log(picture);
               return (
-                <div className="profile__picture">
+                <div key={picture.timestamp} className="profile__picture">
                   <img width="500px" src={picture.imageUrl} />
                 </div>
               );
