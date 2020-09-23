@@ -3,7 +3,7 @@ import "./Chats.css";
 import Chat from "./Chat/Chat";
 import { database } from "./../firebase";
 
-function Chats() {
+function Chats(loggedInUser) {
   const [chats, setChats] = useState([]);
 
   useEffect(() => {
@@ -15,6 +15,15 @@ function Chats() {
         }))
       )
     );
+
+    database
+      .collection("users")
+      .doc(loggedInUser.id)
+      .collection("chats")
+      .get()
+      .then((response) => {
+        console.log(response);
+      });
 
     return () => {
       unsubscribe();

@@ -62,7 +62,7 @@ function Profile(props) {
     };
   }, []);
 
-  const deleteUser = () => {
+  const logout = () => {
     auth.signOut();
     props.onChange(null);
   };
@@ -234,7 +234,7 @@ function Profile(props) {
           ) : null}
         </form>
 
-        <button onClick={deleteUser}>Logout</button>
+        <button onClick={logout}>Logout</button>
       </div>
     </div>
   );

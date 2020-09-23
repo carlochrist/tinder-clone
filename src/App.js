@@ -14,34 +14,37 @@ function App() {
   const [user, setUser] = useState(null);
 
   const handleChange = (newUser) => {
-    database.collection("users").onSnapshot((snapshot) => {
-      console.log(user);
-      snapshot.forEach((doc) => {
-        const currentUser = doc.data();
-        if (newUser.email === currentUser["email"]) {
-          currentUser.id = doc.id;
-          if (!currentUser.hasOwnProperty("gender")) {
-            currentUser.gender = "male";
+    if (newUser === null) {
+      setUser(null);
+    } else {
+      database.collection("users").onSnapshot((snapshot) => {
+        snapshot.forEach((doc) => {
+          const currentUser = doc.data();
+          if (newUser.email === currentUser["email"]) {
+            currentUser.id = doc.id;
+            if (!currentUser.hasOwnProperty("gender")) {
+              currentUser.gender = "male";
+            }
+            if (!currentUser.hasOwnProperty("lookingFor")) {
+              currentUser.lookingFor = "";
+            }
+            if (!currentUser.hasOwnProperty("hereFor")) {
+              currentUser.hereFor = [];
+            }
+            if (!currentUser.hasOwnProperty("likes")) {
+              currentUser.likes = [];
+            }
+            if (!currentUser.hasOwnProperty("dislikes")) {
+              currentUser.dislikes = [];
+            }
+            if (!currentUser.hasOwnProperty("matches")) {
+              currentUser.matches = [];
+            }
+            setUser(currentUser);
           }
-          if (!currentUser.hasOwnProperty("lookingFor")) {
-            currentUser.lookingFor = "";
-          }
-          if (!currentUser.hasOwnProperty("hereFor")) {
-            currentUser.hereFor = [];
-          }
-          if (!currentUser.hasOwnProperty("likes")) {
-            currentUser.likes = [];
-          }
-          if (!currentUser.hasOwnProperty("dislikes")) {
-            currentUser.dislikes = [];
-          }
-          if (!currentUser.hasOwnProperty("matches")) {
-            currentUser.matches = [];
-          }
-          setUser(currentUser);
-        }
+        });
       });
-    });
+    }
   };
 
   // passing a callback to a Child:
@@ -64,7 +67,7 @@ function App() {
             </Route>
             <Route path="/chat">
               <Header backButton="/" />
-              <Chats />
+              <Chats user={user} />
             </Route>
             <Route path="/">
               <Header />

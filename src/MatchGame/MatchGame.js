@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import TinderCard from "react-tinder-card";
+import { Button, Input } from "@material-ui/core";
 import { database } from "./../firebase";
 import "./MatchGame.css";
+import Modal from "@material-ui/core/Modal";
 import useDeepCompareEffect, {
   useDeepCompareEffectNoCheck,
 } from "use-deep-compare-effect";
 
 function MatchGame(loggedInUser) {
-  const [user, setUser] = useState();
   const [users, setUsers] = useState([]);
   const [pictures, setPictures] = useState([]);
   const [picture, setPicture] = useState(null);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [userMatched, setUserMatched] = useState(null);
 
   const loadUserPictures = (userId) => {
     // setSelectedCinema(user);
@@ -69,9 +72,10 @@ function MatchGame(loggedInUser) {
         //   }
 
         if (loggedInUser.user.email !== currentUser.email) {
-          console.log(loggedInUser.user);
-          console.log(currentUser);
-          if (loggedInUser.user.lookingFor === currentUser.gender) {
+          if (
+            loggedInUser.user.lookingFor === currentUser.gender ||
+            loggedInUser.user.lookingFor === "both"
+          ) {
             if (
               !loggedInUser.user.dislikes.includes(currentUser.email) &&
               !loggedInUser.user.likes.includes(currentUser.email)
@@ -151,6 +155,15 @@ function MatchGame(loggedInUser) {
         },
         { merge: true }
       );
+
+      // check for match
+      if (user.likes.includes(loggedInUser.user.email)) {
+        console.log("!!!");
+        console.log(showMatchModal);
+        setUserMatched(user);
+        setShowMatchModal(true);
+        console.log(showMatchModal);
+      }
     }
 
     // console.log(pictures);
@@ -182,12 +195,48 @@ function MatchGame(loggedInUser) {
     const copy = [...users];
     setUsers(copy);
     // setUserDataLoaded(true);
+
+    console.log(showMatchModal);
   };
 
   return (
     <div className="matchGame__outerCardContainer">
       {!userDataLoaded ? (
-        <button onClick={reRenderUsers}> reRedner users </button>
+        <button onClick={reRenderUsers}> load users </button>
+      ) : null}
+
+      {userMatched ? (
+        <Modal
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          open={showMatchModal}
+          onClose={() => setShowMatchModal(false)}
+        >
+          <div className="modal">
+            <form className="app__signup">
+              <h4>Yeassss!</h4>
+              <p>You matched with {userMatched.username}</p>
+              <center>
+                <img
+                  className=""
+                  src={userMatched.pictures[0].imageUrl}
+                  alt=""
+                  width="10%"
+                  heigth="10%"
+                />
+              </center>
+              <Button type="submit" onClick="">
+                Continue swiping
+              </Button>
+              <Button type="submit" onClick="">
+                Jump to chat with {userMatched.username}
+              </Button>
+            </form>
+          </div>
+        </Modal>
       ) : null}
 
       {users.reverse().map((user, index) => (
