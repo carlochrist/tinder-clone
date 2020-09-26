@@ -4,17 +4,50 @@ import { Button, Input } from "@material-ui/core";
 import { database } from "./../firebase";
 import "./MatchGame.css";
 import Modal from "@material-ui/core/Modal";
+import { makeStyles } from "@material-ui/core/styles";
+import { useHistory } from "react-router-dom";
 import useDeepCompareEffect, {
   useDeepCompareEffectNoCheck,
 } from "use-deep-compare-effect";
 
-function MatchGame(loggedInUser) {
+function getModalStyle() {
+  const top = 50;
+  const left = 50;
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+}
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    position: "absolute",
+    width: 400,
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid #000",
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+}));
+
+function MatchGame(props) {
+  const classes = useStyles();
+  const [modalStyle] = useState(getModalStyle);
+  const [loggedInUser, setLoggedInUser] = useState(props);
   const [users, setUsers] = useState([]);
+  const [localUsers, setLocalUsers] = useState([]);
   const [pictures, setPictures] = useState([]);
   const [picture, setPicture] = useState(null);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [userMatched, setUserMatched] = useState(null);
+  const history = useHistory();
+
+  const jumpIntoChat = () => {
+    history.push("/chat");
+  };
 
   const loadUserPictures = (userId) => {
     // setSelectedCinema(user);
@@ -56,21 +89,6 @@ function MatchGame(loggedInUser) {
           ...doc.data(),
         };
 
-        console.log(loggedInUser);
-
-        // const currentUser = doc.data();
-        // if (props.user.email === currentUser["email"]) {
-        //   currentUser.id = doc.id;
-        //   if (!currentUser.hasOwnProperty("gender")) {
-        //     currentUser.gender = "male";
-        //   }
-        //   if (!currentUser.hasOwnProperty("lookingFor")) {
-        //     currentUser.lookingFor = "";
-        //   }
-        //   if (!currentUser.hasOwnProperty("hereFor")) {
-        //     currentUser.hereFor = [];
-        //   }
-
         if (loggedInUser.user.email !== currentUser.email) {
           if (
             loggedInUser.user.lookingFor === currentUser.gender ||
@@ -80,6 +98,8 @@ function MatchGame(loggedInUser) {
               !loggedInUser.user.dislikes.includes(currentUser.email) &&
               !loggedInUser.user.likes.includes(currentUser.email)
             ) {
+              console.log("WTF");
+              console.log(loggedInUser);
               database
                 .collection("users")
                 .doc(currentUser.id)
@@ -103,12 +123,7 @@ function MatchGame(loggedInUser) {
                   console.log(error);
                 });
 
-              console.log(currentUser);
-
               setUsers((oldUsers) => [...oldUsers, currentUser]);
-              // setUsers(users);
-
-              console.log(users);
             }
           }
         }
@@ -135,58 +150,40 @@ function MatchGame(loggedInUser) {
     console.log("You swiped: " + direction);
     // console.log("User: ", user);
 
-    console.log(user);
-    console.log(users);
-    console.log(loggedInUser);
+    if (direction === "left" || direction === "right") {
+      if (direction === "left") {
+        loggedInUser.user.dislikes.push(user.email);
+        database.collection("users").doc(loggedInUser.user.id).set(
+          {
+            dislikes: loggedInUser.user.dislikes,
+          },
+          { merge: true }
+        );
+      } else {
+        loggedInUser.user.likes.push(user.email);
+        database.collection("users").doc(loggedInUser.user.id).set(
+          {
+            likes: loggedInUser.user.likes,
+          },
+          { merge: true }
+        );
 
-    if (direction === "left") {
-      loggedInUser.user.dislikes.push(user.email);
-      database.collection("users").doc(loggedInUser.user.id).set(
-        {
-          dislikes: loggedInUser.user.dislikes,
-        },
-        { merge: true }
-      );
-    } else {
-      loggedInUser.user.likes.push(user.email);
-      database.collection("users").doc(loggedInUser.user.id).set(
-        {
-          likes: loggedInUser.user.likes,
-        },
-        { merge: true }
-      );
-
-      // check for match
-      if (user.likes.includes(loggedInUser.user.email)) {
-        console.log("!!!");
-        console.log(showMatchModal);
-        setUserMatched(user);
-        setShowMatchModal(true);
-        console.log(showMatchModal);
+        // check for match
+        console.log(user);
+        console.log(loggedInUser.user);
+        if (user.hasOwnProperty("likes")) {
+          if (user.likes.includes(loggedInUser.user.email)) {
+            console.log("MATCH!");
+            setUserMatched(user);
+            setShowMatchModal(true);
+          }
+        }
       }
     }
-
-    // console.log(pictures);
-    // console.log(picture);
-
-    // for (let i = 0; i < users.length; i++) {
-    //   if (users[i].id === user.id) {
-    //     users.splice(i, 1);
-    //   }
-    // }
-
-    // setUsers(users);
   };
 
   const reRenderUsers = () => {
-    console.log(users);
-    console.log(pictures);
-
-    // setUsers(users);
-
     if (userDataLoaded === false) {
-      console.log("LOL");
-
       // const copy = [...users];
       // setUsers(copy);
       setUserDataLoaded(true);
@@ -194,9 +191,11 @@ function MatchGame(loggedInUser) {
 
     const copy = [...users];
     setUsers(copy);
-    // setUserDataLoaded(true);
 
-    console.log(showMatchModal);
+    console.log(localUsers);
+    if (localUsers.length === 0) {
+      setLocalUsers(users);
+    }
   };
 
   return (
@@ -206,32 +205,26 @@ function MatchGame(loggedInUser) {
       ) : null}
 
       {userMatched ? (
-        <Modal
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          open={showMatchModal}
-          onClose={() => setShowMatchModal(false)}
-        >
-          <div className="modal">
-            <form className="app__signup">
-              <h4>Yeassss!</h4>
-              <p>You matched with {userMatched.username}</p>
+        <Modal open={showMatchModal} onClose={() => setShowMatchModal(false)}>
+          <div style={modalStyle} className={classes.paper}>
+            <form className="matchgame__match">
+              <center>
+                <h4>Yeassss!</h4>
+                <p>You matched with {userMatched.username}</p>
+              </center>
               <center>
                 <img
                   className=""
                   src={userMatched.pictures[0].imageUrl}
                   alt=""
-                  width="10%"
-                  heigth="10%"
+                  width="50%"
+                  heigth="50%"
                 />
               </center>
-              <Button type="submit" onClick="">
+              <Button onClick={() => setShowMatchModal(false)}>
                 Continue swiping
               </Button>
-              <Button type="submit" onClick="">
+              <Button onClick={jumpIntoChat}>
                 Jump to chat with {userMatched.username}
               </Button>
             </form>
@@ -239,7 +232,7 @@ function MatchGame(loggedInUser) {
         </Modal>
       ) : null}
 
-      {users.reverse().map((user, index) => (
+      {localUsers.reverse().map((user, index) => (
         <div key={user.id} className="matchGame__innerCardContainer">
           {user.pictures && (
             <TinderCard

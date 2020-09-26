@@ -24,7 +24,7 @@ function Login(props) {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         // user has logged in
-        console.log(authUser);
+        // console.log(authUser);
         setUser(authUser);
 
         // console.log(props);
