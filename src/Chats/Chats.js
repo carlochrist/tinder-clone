@@ -9,6 +9,8 @@ function Chats(loggedInUser) {
   const [matchedUsers, setMatchedUsers] = useState([]);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
 
+  //Matchedwith als Objekt —> + chatId
+
   useEffect(() => {
     const unsubscribe = database.collection("users").onSnapshot((snapshot) => {
       snapshot.forEach((doc) => {
@@ -39,15 +41,13 @@ function Chats(loggedInUser) {
                   fetchedPictures.push(fetchedPicture);
                 });
 
-                currentUser.pictures = [];
-                Object.assign(currentUser.pictures, fetchedPictures);
+                currentUser.pictures = fetchedPictures;
+                setMatchedUsers((oldUsers) => [...oldUsers, currentUser]);
               })
               .catch((error) => {
                 // setError(error);
                 console.log(error);
               });
-
-            setMatchedUsers((oldUsers) => [...oldUsers, currentUser]);
           }
         }
       });
@@ -61,67 +61,93 @@ function Chats(loggedInUser) {
     // this will run ONCE when the component loads and never again
   }, []);
 
-  // useEffect(() => {
-  //   const unsubscribe = database.collection("chats").onSnapshot((snapshot) =>
-  //     setChats(
-  //       snapshot.docs.map((doc) => ({
-  //         id: doc.id,
-  //         data: doc.data(),
-  //       }))
-  //     )
-  //   );
+  useEffect(() => {
+    const unsubscribe = database.collection("chats").onSnapshot((snapshot) =>
+      snapshot.forEach((doc) => {
+        const currentChat = {
+          id: doc.id,
+          ...doc.data(),
+        };
 
-  //   console.log(loggedInUser);
+        if (
+          currentChat.userEmail1 === loggedInUser.user.email ||
+          currentChat.userEmail2 === loggedInUser.user.email
+        ) {
+          database
+            .collection("chats")
+            .doc(currentChat.id)
+            .collection("messages")
+            .get()
+            .then((response) => {
+              const fetchedMessages = [];
+              response.forEach((message) => {
+                const fetchedMessage = {
+                  id: message.id,
+                  ...message.data(),
+                };
+                fetchedMessages.push(fetchedMessage);
+              });
 
-  //   // find matches and get pictures
+              currentChat.messages = fetchedMessages;
+              setChats((oldChats) => [...oldChats, currentChat]);
+            })
+            .catch((error) => {
+              // setError(error);
+              console.log(error);
+            });
 
-  //   // database
-  //   //   .collection("users")
-  //   //   .doc(loggedInUser.user.id)
-  //   //   .collection("chats")
-  //   //   .get()
-  //   //   .then((response) => {
-  //   //     console.log(response);
-  //   //   });
+          // setChats((oldChats) => [...oldChats, currentChat]);
+        }
 
-  //   return () => {
-  //     unsubscribe();
-  //   };
-  // }, []);
+        // console.log(currentChat);
+      })
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // return <div className="chatScreen"></div>;
 
-  const reRenderUsers = () => {
-    if (userDataLoaded === false) {
-      // const copy = [...users];
-      // setUsers(copy);
-      setUserDataLoaded(true);
-    }
+  // {chat.map((message, index) => (
+  //   <div key={message.id} className="">
+  //     <p>{chat.userEmail1}</p>
+  //   </div>
+  // ))}
 
-    const copy = [...matchedUsers];
-    setMatchedUsers(copy);
+  // {chat.messages.map((message, index) => (
+  //   <div key={message.id} className="">
+  //     <p>{message.userEmail}</p>
+  //     <p>{message.timestamp}</p>
+  //     <p>{message.message}</p>
+  //   </div>
+  // ))}
 
-    // console.log(localUsers);
-    // if (localUsers.length === 0) {
-    //   setLocalUsers(users);
-    // }
+  const logData = () => {
+    console.log(chats);
   };
 
   return (
     <div>
-      {!userDataLoaded ? (
-        <button onClick={reRenderUsers}> load users </button>
-      ) : null}
+      <MatchBar matchedUsers={matchedUsers} />
 
-      {matchedUsers.map((user) => (
-        <div key={user.id}>
-          <p>{user.id}</p>
-          {user.username ? <p> {user.username}</p> : null}
-          {user.pictures ? <p> bilder xd </p> : null}
+      {chats.map((chat, index) => (
+        <div key={chat.id} className="">
+          <p>{chat.userEmail1}</p>
+          <p>{chat.userEmail2}</p>
+
+          <button onClick={logData}>log</button>
+
+          {chat.messages.map((message, index) => (
+            <div key={message.id} className="">
+              <p>{message.userEmail}</p>
+              <p>{message.timestamp}</p>
+              <p>{message.message}</p>
+            </div>
+          ))}
         </div>
       ))}
-
-      <MatchBar matchedUsers={matchedUsers} />
 
       <div className="chats">
         <Chat

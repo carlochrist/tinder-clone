@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import TinderCard from "react-tinder-card";
 import { Button, Input } from "@material-ui/core";
-import { database } from "./../firebase";
+import { database, firebaseApp } from "./../firebase";
 import "./MatchGame.css";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router-dom";
+import firebase from "firebase";
 import useDeepCompareEffect, {
   useDeepCompareEffectNoCheck,
 } from "use-deep-compare-effect";
@@ -175,6 +176,37 @@ function MatchGame(props) {
         console.log(loggedInUser.user);
         if (user.hasOwnProperty("likes")) {
           if (user.likes.includes(loggedInUser.user.email)) {
+            //Matchedwith als Objekt —> + chatId
+
+            // add new chat and get id
+            database.collection("chats").add({
+              userEmail1: loggedInUser.user.email,
+              userEmail2: user.email,
+              messages: [],
+            });
+
+            // // add matchedUser to loggedInUser
+            // database
+            //   .collection("users")
+            //   .doc(loggedInUser.user.id)
+            //   .update({
+            //     matchedWith: firebase.firestore.FieldValue.arrayUnion({
+            //       matchedWith: user.email,
+            //       chatId: 123,
+            //     }),
+            //   });
+
+            // // add loggedInUser to matchedUser
+            // database
+            //   .collection("users")
+            //   .doc(user.id)
+            //   .update({
+            //     matchedWith: firebase.firestore.FieldValue.arrayUnion({
+            //       matchedWith: loggedInUser.user.email,
+            //       chatId: 123,
+            //     }),
+            //   });
+
             console.log("MATCH!");
             setUserMatched(user);
             setShowMatchModal(true);
