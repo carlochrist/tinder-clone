@@ -19,8 +19,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const logData = (user) => {
+  console.log(user);
+};
+
 function MatchBar(matchedUsers) {
   const classes = useStyles();
+
+  const setUserInChatsComponent = (clickedUser) => {
+    matchedUsers.onChange(clickedUser);
+  };
 
   return (
     <div
@@ -39,6 +47,7 @@ function MatchBar(matchedUsers) {
             marginLeft: "10px",
             marginRight: "10px",
           }}
+          onClick={() => setUserInChatsComponent(user)}
         >
           {user.pictures && (
             <Avatar

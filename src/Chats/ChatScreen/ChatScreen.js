@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import "./ChatScreen.css";
 import Avatar from "@material-ui/core/Avatar";
 
-function ChatScreen({}) {
+function ChatScreen(chat) {
+  console.log(chat);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
-
   const handleSend = (e) => {
     e.preventDefault();
     setMessages([...messages, { message: input }]);

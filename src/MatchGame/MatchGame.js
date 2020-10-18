@@ -182,6 +182,8 @@ function MatchGame(props) {
             database.collection("chats").add({
               userEmail1: loggedInUser.user.email,
               userEmail2: user.email,
+              userName1: loggedInUser.user.username,
+              userName2: user.username,
               messages: [],
             });
 
