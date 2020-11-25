@@ -5,6 +5,7 @@ import ImageUpload from "./ImageUpload/ImageUpload";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { Link, useHistory } from "react-router-dom";
 
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
@@ -23,6 +24,7 @@ function Profile(props) {
     slidesToScroll: 1,
     className: "slides",
   };
+  const history = useHistory();
 
   useEffect(() => {
     let unsubscribe;
@@ -31,6 +33,11 @@ function Profile(props) {
     unsubscribe = database.collection("users").onSnapshot((snapshot) => {
       snapshot.forEach((doc) => {
         const currentUser = doc.data();
+
+        // console.log("vergleich!!!!!!!");
+        // console.log(props.user.email);
+        // console.log(currentUser.email);
+
         if (props.user.email === currentUser["email"]) {
           currentUser.id = doc.id;
           if (!currentUser.hasOwnProperty("gender")) {
@@ -51,7 +58,6 @@ function Profile(props) {
               setPictures(snapshot.docs.map((doc) => doc.data()));
             });
 
-          console.log(currentUser);
           setUser(currentUser);
         }
       });
@@ -63,8 +69,13 @@ function Profile(props) {
   }, []);
 
   const logout = () => {
-    auth.signOut();
     props.onChange(null);
+    auth.signOut();
+    jumpIntoChat();
+  };
+
+  const jumpIntoChat = () => {
+    history.push("/");
   };
 
   const updateUserData = (event) => {
@@ -108,6 +119,11 @@ function Profile(props) {
     return user.hereFor.indexOf(hereFor) !== -1 ? true : false;
   };
 
+  const logUser = () => {
+    console.log(props);
+    console.log(user);
+  };
+
   return (
     <div>
       <div className="profile">
@@ -128,6 +144,7 @@ function Profile(props) {
       <ImageUpload user={user} />
 
       <div>
+        <button onClick={logUser}>log user</button>
         {user ? <label>Hey {user.username}!</label> : null}
 
         <form>

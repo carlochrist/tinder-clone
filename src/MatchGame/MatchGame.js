@@ -95,13 +95,17 @@ function MatchGame(props) {
 
                   currentUser.pictures = fetchedPictures;
 
-                  setUsers((oldUsers) => {
-                    if (
-                      oldUsers.find((user) => user.email === currentUser.email)
-                    )
-                      return oldUsers;
-                    return [...oldUsers, currentUser];
-                  });
+                  if (currentUser.pictures.length > 0) {
+                    setUsers((oldUsers) => {
+                      if (
+                        oldUsers.find(
+                          (user) => user.email === currentUser.email
+                        )
+                      )
+                        return oldUsers;
+                      return [...oldUsers, currentUser];
+                    });
+                  }
                 })
                 .catch((error) => {
                   // setError(error);
@@ -138,84 +142,71 @@ function MatchGame(props) {
 
   const onSwipe = (direction, user) => {
     console.log("You swiped: " + direction);
-    console.log("User: ", user);
 
-    // delete undefined entrys
 
-    // if (  loggedInUser.user.dislikes.length === 0) {
-    //   loggedInUser.user.dislikes = [];
-    // }
-    // for (let i = 0; loggedInUser.user.dislikes.length; i++) {
-    //   if (loggedInUser.user.dislikes[i] === undefined) {
-    //     loggedInUser.user.dislikes.splice(i, 1);
-    //   }
-    // }
 
-    if (direction === "left" || direction === "right") {
-      if (direction === "left") {
-        if (!loggedInUser.user.dislikes.includes(user.email)) {
-          loggedInUser.user.dislikes.push(user.email);
-          database.collection("users").doc(loggedInUser.user.id).set(
-            {
-              dislikes: loggedInUser.user.dislikes,
-            },
-            { merge: true }
-          );
-        }
-      } else {
-        loggedInUser.user.likes.push(user.email);
-        database.collection("users").doc(loggedInUser.user.id).set(
-          {
-            likes: loggedInUser.user.likes,
-          },
-          { merge: true }
-        );
+    // get latest user-version
+ database.collection("users").onSnapshot((snapshot) => {
+      snapshot.forEach((doc) => {
+        const currentUser = {
+          id: doc.id,
+          ...doc.data(),
+        };
 
-        // check for match
-        console.log(user);
-        console.log(loggedInUser.user);
-        if (user.hasOwnProperty("likes")) {
-          if (user.likes.includes(loggedInUser.user.email)) {
-            //Matchedwith als Objekt —> + chatId
+        if (currentUser.id === user.id && !loggedInUser.user.likes.includes(currentUser.email)) {
+          if (direction === "left" || direction === "right") {
+            if (direction === "left") {
+              if (!loggedInUser.user.dislikes.includes(currentUser.email)) {
+                loggedInUser.user.dislikes.push(currentUser.email);
+                database.collection("users").doc(loggedInUser.user.id).set(
+                  {
+                    dislikes: loggedInUser.user.dislikes,
+                  },
+                  { merge: true }
+                );
+              }
+            } else {
+              loggedInUser.user.likes.push(user.email);
+              database.collection("users").doc(loggedInUser.user.id).set(
+                {
+                  likes: loggedInUser.user.likes,
+                },
+                { merge: true }
+              );
+      
+              // check for match
+              console.log(currentUser);
+              console.log(loggedInUser.user);
+              if (currentUser.hasOwnProperty("likes")) {
+                if (currentUser.likes.includes(loggedInUser.user.email)) {
+                  //Matchedwith als Objekt —> + chatId
+      
+                  // add new chat and get id
+                  database.collection("chats").add({
+                    userEmail1: loggedInUser.user.email,
+                    userEmail2: currentUser.email,
+                    userName1: loggedInUser.user.username,
+                    userName2: currentUser.username,
+                    messages: [],
+                  });
+            
+                       console.log("MATCH!");
+                      //  console.log("User: ", user);
+                      //  console.log("currentUser: ", currentUser);
 
-            // add new chat and get id
-            database.collection("chats").add({
-              userEmail1: loggedInUser.user.email,
-              userEmail2: user.email,
-              userName1: loggedInUser.user.username,
-              userName2: user.username,
-              messages: [],
-            });
-
-            // // add matchedUser to loggedInUser
-            // database
-            //   .collection("users")
-            //   .doc(loggedInUser.user.id)
-            //   .update({
-            //     matchedWith: firebase.firestore.FieldValue.arrayUnion({
-            //       matchedWith: user.email,
-            //       chatId: 123,
-            //     }),
-            //   });
-
-            // // add loggedInUser to matchedUser
-            // database
-            //   .collection("users")
-            //   .doc(user.id)
-            //   .update({
-            //     matchedWith: firebase.firestore.FieldValue.arrayUnion({
-            //       matchedWith: loggedInUser.user.email,
-            //       chatId: 123,
-            //     }),
-            //   });
-
-            console.log("MATCH!");
-            setUserMatched(user);
-            setShowMatchModal(true);
+                       // add pictures to currentUser
+                       currentUser.pictures = user.pictures;
+                  setUserMatched(currentUser);
+                  setShowMatchModal(true);
+                }
+              }
+            }
           }
+
         }
-      }
-    }
+
+      });
+    });
   };
 
   return (
@@ -241,7 +232,7 @@ function MatchGame(props) {
                 Continue swiping
               </Button>
               <Button onClick={jumpIntoChat}>
-                Jump to chat with {userMatched.username}
+                Jump to chats
               </Button>
             </form>
           </div>

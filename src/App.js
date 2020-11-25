@@ -12,9 +12,12 @@ import { database } from "./firebase";
 
 function App() {
   const [user, setUser] = useState(null);
+  // console.log(user);
 
   const handleChange = (newUser) => {
+ 
     if (newUser === null) {
+      console.log("test");
       setUser(null);
     } else {
       database.collection("users").onSnapshot((snapshot) => {
@@ -57,6 +60,11 @@ function App() {
       ) : (
         <Router>
           <Switch>
+            <Route path="/" exact>
+              <Header />
+              <MatchGame user={user} />
+              <SwipeButtons />
+            </Route>
             <Route path="/profile">
               <Header />
               <Profile user={user} onChange={handleChange} />
@@ -68,11 +76,6 @@ function App() {
             <Route path="/chat">
               <Header backButton="/" />
               <Chats user={user} />
-            </Route>
-            <Route path="/">
-              <Header />
-              <MatchGame user={user} />
-              <SwipeButtons />
             </Route>
           </Switch>
         </Router>

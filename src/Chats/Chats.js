@@ -79,6 +79,7 @@ function Chats(loggedInUser) {
             .collection("chats")
             .doc(currentChat.id)
             .collection("messages")
+            .orderBy("timestamp", "asc")
             .get()
             .then((response) => {
               const fetchedMessages = [];
@@ -110,8 +111,6 @@ function Chats(loggedInUser) {
     };
   }, []);
 
-  // return <div className="chatScreen"></div>;
-
   const logData = () => {
     console.log(chats);
     console.log(chats[0].messages);
@@ -120,21 +119,25 @@ function Chats(loggedInUser) {
 
   const getUserChat = (userEmail) => {
     let foundChat = chats.filter(
-      (chat) => chat.userEmail === userEmail || chat.userEmail2 === userEmail
+      (chat) => chat.userEmail1 === userEmail || chat.userEmail2 === userEmail
     )[0];
 
-    if (foundChat.userMail1 === loggedInUser.user.email) {
+    if (foundChat.userEmail1 === loggedInUser.user.email) {
       foundChat.username1 = loggedInUser.user.username;
       foundChat.username2 = getUserName(foundChat);
     } else {
       foundChat.username1 = getUserName(foundChat);
       foundChat.username2 = loggedInUser.user.username;
     }
-
-    console.log(foundChat);
     return foundChat;
+  };
 
-    // setChatToOpen(foundChat);
+  const getUser = (chat) => {
+    let userEmail =
+      chat.userEmail1 === loggedInUser.user.email
+        ? chat.userEmail2
+        : chat.userEmail1;
+    return matchedUsers.filter((user) => user.email === userEmail)[0];
   };
 
   const getUserName = (chat) => {
@@ -165,9 +168,11 @@ function Chats(loggedInUser) {
   };
 
   const getLastMessage = (chat) => {
-    return chat.messages.reduce((prev, current) =>
-      prev.timestamp.seconds > current.timestamp.seconds ? prev : current
-    ).message;
+    if (chat.messages.length !== 0) {
+      return chat.messages.reduce((prev, current) =>
+        prev.timestamp.seconds > current.timestamp.seconds ? prev : current
+      ).message;
+    }
   };
 
   const getUserImage = (chat) => {
@@ -185,8 +190,11 @@ function Chats(loggedInUser) {
   };
 
   const handleChange = (clickedUser) => {
-    console.log(getUserChat(clickedUser.email));
-    setChatToOpen(getUserChat(clickedUser.email));
+    let chatToOpenData = getUserChat(clickedUser.email);
+    chatToOpenData.loggedInUser = loggedInUser.user.email;
+    chatToOpenData.matchedUserImage = getUserImage(chatToOpenData);
+    setChatToOpen(chatToOpenData);
+    console.log(chatToOpenData);
     setChatOpened(true);
   };
 
@@ -203,13 +211,15 @@ function Chats(loggedInUser) {
           <MatchBar matchedUsers={matchedUsers} onChange={handleChange} />
           {chats.map((chat, index) => {
             return (
-              <div key={chat.id}>
-                <Chat
-                  name={getUserName(chat)}
-                  message={getLastMessage(chat)}
-                  timestamp={getLastMessageDatetime(chat)}
-                  profilePic={getUserImage(chat)}
-                />
+              <div key={chat.id} onClick={() => handleChange(getUser(chat))}>
+                {chat.messages.length > 0 ? (
+                  <Chat
+                    name={getUserName(chat)}
+                    message={getLastMessage(chat)}
+                    timestamp={getLastMessageDatetime(chat)}
+                    profilePic={getUserImage(chat)}
+                  />
+                ) : null}
               </div>
             );
           })}

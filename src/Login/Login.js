@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Button, Input } from "@material-ui/core";
 import "./Login.css";
 import { database, auth } from "./../firebase";
+import { Link, useHistory, withRouter } from "react-router-dom";
 
 function Login(props) {
   //   console.log(props);
+
+  const history = useHistory();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -14,7 +17,8 @@ function Login(props) {
   const [signUpPressed, setSignUpPressed] = useState(false);
 
   const setUserInMainComponent = (authUser) => {
-    // console.log(authUser);
+    // console.log("hallo?!");
+    console.log(authUser);
     // console.log(props);
     props.onChange(authUser);
   };
@@ -24,12 +28,14 @@ function Login(props) {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         // user has logged in
-        // console.log(authUser);
-        setUser(authUser);
-
         // console.log(props);
+        // console.log(authUser);
+        // setUser(authUser);
+
+        // history.push("/");
         // console.log(props.handleChange);
         setUserInMainComponent(authUser);
+
         // props.handleChange(props.item.id)}
       } else {
         // user logged out
@@ -61,18 +67,31 @@ function Login(props) {
           username: username,
           email: email,
         });
-        return authUser.user.updateProfile({
-          displayName: username,
-        });
+        // auth
+        //   .signInWithEmailAndPassword(email, password)
+        //   .catch((error) => alert(error.message));
+        // setUserInMainComponent(authUser);
+
+        // return authUser.user.updateProfile({
+        //   displayName: username,
+        // });
       })
       .catch((error) => alert(error.message));
+
+    setSignUpPressed(false);
   };
 
   const signIn = (event) => {
     event.preventDefault();
 
+    console.log("lol");
+
     auth
       .signInWithEmailAndPassword(email, password)
+      // .then((firebaseUser) => {
+      //   console.log(firebaseUser)
+      //   setUser(firebaseUser.user)
+      // })
       .catch((error) => alert(error.message));
   };
 
@@ -119,7 +138,7 @@ function Login(props) {
             type="text"
             placeholder="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.toLowerCase())}
           />
         ) : null}
 
